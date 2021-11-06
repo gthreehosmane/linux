@@ -46,11 +46,15 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
 
      - goto the linux folder(linux folder will be created after cloning is complete)
      - make menuconfig - no changes were made
-     - copy the current config file to a new config file in current directory(Config version may vary based on the linux distro you are using). command uname -a can be used to check the current config
-         command - cp /boot/config-5.11.0-38-generic  .config
+     - copy the current config file to a new config file in current directory(Config version may vary based on the linux distro you are using). command uname -a can be used to check the current config using command 
+     - cp /boot/config-5.11.0-38-generic  .config
      - make oldconfig
      - make prepare
-     - created x509.genkey file under /linux/certs, signing_key.pem file under/linux/certs, canonical-certs.pem file under /linux/debian,  canonical-revoked-certs.pem file /linux/debian**
+     - created following files manually
+       - x509.genkey file under /linux/certs
+       - signing_key.pem file under/linux/certs 
+       - canonical-certs.pem file under /linux/debian  
+       - canonical-revoked-certs.pem file /linux/debian**
      - make -j 6 modules (replace 6 with the number of cup cores you have allocated to the vm - this is for compiling modules in parallel)
      - make -j 6
      - sudo make modules_install
@@ -70,27 +74,28 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
 
 
 
-** I encountered errors during make modules_install step regarding missing signing key certificates(This may not happen in all linux distros). I created following missing certificates manually
-     - Create x509.genkey file under /linux/certs using vi command in terminal
-     Contents of the x509.genkey file
+** I encountered errors during make modules_install step regarding missing signing key certificates(This may not happen in all linux distros). I created following missing certificates manually.
      
-        [ req ]
-        default_bits = 4096
-        distinguished_name = req_distinguished_name
-        prompt = no
-        string_mask = utf8only
-        x509_extensions = myexts
+     - Create x509.genkey file under /linux/certs using vi command in terminal
+     - Contents of the x509.genkey file
+     
+	[ req ]
+	default_bits = 4096
+	distinguished_name = req_distinguished_name
+	prompt = no
+	string_mask = utf8only
+	x509_extensions = myexts
 
-        [ req_distinguished_name ]
-        O = teja
-        CN = teja signing key
-        emailAddress = XXXobscuredXXX
+	[ req_distinguished_name ]
+	O = teja
+	CN = teja signing key
+	emailAddress = XXXobscuredXXX
 
-        [ myexts ]
-        basicConstraints=critical,CA:FALSE
-        keyUsage=digitalSignature
-        subjectKeyIdentifier=hash
-        authorityKeyIdentifier=keyid
+	[ myexts ]
+	basicConstraints=critical,CA:FALSE
+	keyUsage=digitalSignature
+	subjectKeyIdentifier=hash
+	authorityKeyIdentifier=keyid
         
         
      -  To create signing_key.pem file under/linux/certs goto the certs folder in linux folder, open a terminal and use the below command
