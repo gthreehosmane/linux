@@ -14,8 +14,8 @@ Steps Followed to complete the assignment.
 8. You will be asked for password and provide your Ubuntu user account password and press enter to begin installation process.
 9. To make sure that the installation is complete, you can type "git --version" command in terminal and check the version of git. If git is installed correctly, the version will be displayed.
 10. GitHub uses your commit email address to associate commits with your account on GitHub.com. Setup username and email for your git using the following commands. 
-   to setup git username - $ git config --global user.name "Teja"
-   to setup git email id - $ git config --global user.email "teja.jaddipal@gmail.com"
+   - to setup git username - $ git config --global user.name "Teja"
+   - to setup git email id - $ git config --global user.email "teja.jaddipal@gmail.com"
 
 More detailed informationcan be found in https://docs.github.com/en/get-started/quickstart/set-up-git#next-steps-authenticating-with-github-from-git. To make commits from git the primary email id associated with Github account must be same as the email id that is used with git. If you want to use a different email id with git, add that email id to your github.com account.
 
