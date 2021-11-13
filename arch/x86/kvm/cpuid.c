@@ -10,6 +10,7 @@
  */
 
 #include <linux/kvm_host.h>
+#include <linux/kernel.h>
 #include <linux/export.h>
 #include <linux/vmalloc.h>
 #include <linux/uaccess.h>
@@ -31,6 +32,11 @@
  */
 u32 kvm_cpu_caps[NR_KVM_CPU_CAPS] __read_mostly;
 EXPORT_SYMBOL_GPL(kvm_cpu_caps);
+
+u32 total_exits=0;
+u64 total_time_in_vmm=0;
+EXPORT_SYMBOL(total_exits);
+EXPORT_SYMBOL(total_time_in_vmm);
 
 static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
@@ -1239,7 +1245,18 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 
 	eax = kvm_rax_read(vcpu);
 	ecx = kvm_rcx_read(vcpu);
+	if(eax == 0x4fffffff){
+	   eax = total_exits;
+	   printk(KERN_INFO "Total exits: %u",total_exits);
+	}
+	//reference https://social.msdn.microsoft.com/Forums/vstudio/en-US/fca5d5ec-1760-4da1-82bc-cbd608f4db23/separating-high-and-low-32-bits-in-a-64-bit-interger?forum=vclanguage
+	else if(eax == 0x4ffffffe){
+	   ebx = (unsigned long)total_time_in_vmm>>32;    //high 32 bits
+	   ecx = (unsigned long)total_time_in_vmm&0xffffffff;    //low 32 bits
+	}
+	else{
 	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
+	}
 	kvm_rax_write(vcpu, eax);
 	kvm_rbx_write(vcpu, ebx);
 	kvm_rcx_write(vcpu, ecx);

@@ -69,6 +69,8 @@
 MODULE_AUTHOR("Qumranet");
 MODULE_LICENSE("GPL");
 
+extern u32 total_exits;
+extern u64 total_time_in_vmm;
 #ifdef MODULE
 static const struct x86_cpu_id vmx_cpu_id[] = {
 	X86_MATCH_FEATURE(X86_FEATURE_VMX, NULL),
@@ -5911,7 +5913,14 @@ void dump_vmcs(struct kvm_vcpu *vcpu)
 		pr_err("Virtual processor ID = 0x%04x\n",
 		       vmcs_read16(VIRTUAL_PROCESSOR_ID));
 }
-
+//functionto read time
+// reference https://www.mcs.anl.gov/~kazutomo/rdtsc.html
+static __inline__ unsigned long long read_time(void)
+{
+  unsigned hi, lo;
+  __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+  return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+}
 /*
  * The guest has exited.  See if we can fix it or if we need userspace
  * assistance.
@@ -5922,7 +5931,15 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	union vmx_exit_reason exit_reason = vmx->exit_reason;
 	u32 vectoring_info = vmx->idt_vectoring_info;
 	u16 exit_handler_index;
-
+	u64 start_time=0;
+        u64 end_time=0;
+        u64 time_spent=0;
+        
+        total_exits++;
+        
+        
+        start_time = read_time();
+        printk(KERN_INFO "Time spent in vmm start: %llu",start_time);
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
 	 * updated. Another good is, in kvm_vm_ioctl_get_dirty_log, before
@@ -6062,8 +6079,12 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 						kvm_vmx_max_exit_handlers);
 	if (!kvm_vmx_exit_handlers[exit_handler_index])
 		goto unexpected_vmexit;
-
+        end_time = read_time();
+	time_spent = end_time-start_time;
+	total_time_in_vmm=total_time_in_vmm+time_spent;
+	printk(KERN_INFO "Time spent in vmm: %llu",time_spent);
 	return kvm_vmx_exit_handlers[exit_handler_index](vcpu);
+	
 
 unexpected_vmexit:
 	vcpu_unimpl(vcpu, "vmx: unexpected exit reason 0x%x\n",
