@@ -41,6 +41,7 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
      - sudo apt-get install flex
      - sudo apt-get install bison
      - sudo apt-get install libncurses5-dev gcc make git exuberant-ctags bc libssl-dev
+     - sudo apt install dwarves (to resolve CONFIG_DEBUG_INFO_BTF related error)
 
 17. steps to build kernel
 
