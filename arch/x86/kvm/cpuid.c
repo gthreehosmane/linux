@@ -1247,15 +1247,16 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	ecx = kvm_rcx_read(vcpu);
 	if(eax == 0x4fffffff){
 	   eax = total_exits;
-	   printk(KERN_INFO "Total exits: %u",total_exits);
+	   printk(KERN_INFO "CPUID(0x4FFFFFFF) : Total exits- %u",total_exits);
 	}
 	//reference https://social.msdn.microsoft.com/Forums/vstudio/en-US/fca5d5ec-1760-4da1-82bc-cbd608f4db23/separating-high-and-low-32-bits-in-a-64-bit-interger?forum=vclanguage
 	else if(eax == 0x4ffffffe){
 	   ebx = (unsigned long)total_time_in_vmm>>32;    //high 32 bits
 	   ecx = (unsigned long)total_time_in_vmm&0xffffffff;    //low 32 bits
+	   printk(KERN_INFO "CPUID(0x4FFFFFFE) : Time spent in processing all exits- %llu cycles",total_time_in_vmm);
 	}
 	else{
-	kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
+	   kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
 	}
 	kvm_rax_write(vcpu, eax);
 	kvm_rbx_write(vcpu, ebx);

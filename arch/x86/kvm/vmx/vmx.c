@@ -48,6 +48,7 @@
 #include <asm/virtext.h>
 #include <asm/vmx.h>
 
+
 #include "capabilities.h"
 #include "cpuid.h"
 #include "evmcs.h"
@@ -65,6 +66,7 @@
 #include "vmcs12.h"
 #include "vmx.h"
 #include "x86.h"
+
 
 MODULE_AUTHOR("Qumranet");
 MODULE_LICENSE("GPL");
@@ -5921,6 +5923,8 @@ static __inline__ unsigned long long read_time(void)
   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
   return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 }
+/*Intel intrinsic guide for rdtsc
+https://www.intel.com/content/www/us/en/docs/intrinsics-guide/index.html#expand=4067,602,2978,4071,4255&techs=SSE,SSE2,SSE3,SSSE3,SSE4_1,SSE4_2,AVX,AVX2,Other&text=rdtsc*/
 /*
  * The guest has exited.  See if we can fix it or if we need userspace
  * assistance.
@@ -5939,7 +5943,6 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
         
         
         start_time = read_time();
-        printk(KERN_INFO "Time spent in vmm start: %llu",start_time);
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
 	 * updated. Another good is, in kvm_vm_ioctl_get_dirty_log, before
@@ -6082,7 +6085,6 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
         end_time = read_time();
 	time_spent = end_time-start_time;
 	total_time_in_vmm=total_time_in_vmm+time_spent;
-	printk(KERN_INFO "Time spent in vmm: %llu",time_spent);
 	return kvm_vmx_exit_handlers[exit_handler_index](vcpu);
 	
 
