@@ -134,12 +134,15 @@ Prerequisite - Working assignment 1
    b. Could not use __rdtsc() function from intel intrinsic to read the time as it was causing some errors. So used inline assembly code snippet to read time.
   
 	// reference https://www.mcs.anl.gov/~kazutomo/rdtsc.html
+	
+	
 	static __inline__ unsigned long long read_time(void)
 	{
 	  unsigned hi, lo;
 	  __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
 	  return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 	}
+	
     
     c. For printk macro to work we need to add kernel.h header in cpuid.c using #include <linux/kernel.h>
     
