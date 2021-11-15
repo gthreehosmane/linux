@@ -128,8 +128,10 @@ Prerequisite - Working assignment 1
 
 1. Goto path-to-linux-folder-/linux/arch/x86 
 2. Modify the vmx.c and cpuid.c by adding required code to handle special CPUID leaf nodes 0x4FFFFFFF and 0x4FFFFFFE. vmx.c will be located in ../x86/kvm/vmx/vmx.c and cpuid.c in ../x86/kvm/cpuid.c
-  2a. Initially declared total_exits and total_time_in_vmm variables in vmx.c, exported them using EXPORT_SYMBOL macro,used them as extern variables in cpuid.c but  got cyclic dependency error between kvm and kvm_intel modules during make modules_install step. Because of this error global variables were not exported. So as a work around declared global variables in cpuid.c and used them as extern variables in vmx.c. It is also necessary to initialize these variables during declaration to avoid undefined variable error during compilation. Cyclic dependency error is due to the reason that, cpuid.c is in kvm module and vmx.c is in kvm_intel module. kvm_intel modules is dependent on kvm module. When we use use a global variable in cpuid.c, which is declared and exported in vmx.c, a cyclic dependency is created in my case. 
-  2b. Could not use __rdtsc() function from intel intrinsic to read the time as it was causing some errors. So used inline assembly code snippet to read time.
+   a. Initially declared total_exits and total_time_in_vmm variables in vmx.c, exported them using EXPORT_SYMBOL macro,used them as extern variables in cpuid.c but  got cyclic dependency error between kvm and kvm_intel modules during make modules_install step. Because of this error global variables were not exported. So as a work around declared global variables in cpuid.c and used them as extern variables in vmx.c. It is also necessary to initialize these variables during declaration to avoid undefined variable error during compilation. Cyclic dependency error is due to the reason that, cpuid.c is in kvm module and vmx.c is in kvm_intel module. kvm_intel modules is dependent on kvm module. When we use use a global variable in cpuid.c, which is declared and exported in vmx.c, a cyclic dependency is created in my case. 
+   
+  b. Could not use __rdtsc() function from intel intrinsic to read the time as it was causing some errors. So used inline assembly code snippet to read time.
+  
 // reference https://www.mcs.anl.gov/~kazutomo/rdtsc.html
 static __inline__ unsigned long long read_time(void)
 {
@@ -137,15 +139,16 @@ static __inline__ unsigned long long read_time(void)
   __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
   return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
 }
-  2c. For printk macro to work we need to add kernel.h header in cpuid.c using #include <linux/kernel.h>
+    
+    c. For printk macro to work we need to add kernel.h header in cpuid.c using #include <linux/kernel.h>
 3. Follow below steps to compile the modified code, if there are some errors, you will get errors. Make sure the code compiles without any errors.
      - sudo make -j 6 (Replace 6 with number of vcpus allocated to your vm)
      - sudo make modules_install
      - sudo make install
      - sudo rmmod kvm_intel (Remove existing kvm and kvm_intel modules. kvm module cannot be removed first since it is kvm_intel module is depending on kvm module, so kvm_intel must be removed first.)
      - sudo rmmod kvm
-     - sudo depmod kvm (load the modules with newly added code.)
-     - sudo depmod kvm_intel
+     - sudo modprobe kvm (load the modules with newly added code.)
+     - sudo modprobe kvm_intel
      - Check if modules are loaded using command  - $lsmod | grep kvm
      - We can also check if variables are exported correctly using command - $cat /proc/kallsyms | grep 'variable name'
 
