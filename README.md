@@ -34,7 +34,7 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
 15. In terminal, once you are in the directory, where you want to clone the repository type "git clone" and after that add a space and paste the link that you copied from previous step and press enter. The cloning should start after this. Cloning may take some time to complete.
 
 
-16. Installing packages necessary for kernel compilation and installation: During code compilation, I encountered errors for each missing library, so after multiple tries to compile the code, made list of librarires required.
+16. Installing packages necessary for kernel compilation and installation: During code compilation, I encountered errors for each missing library, so after multiple tries to compile the code, made list of libraries required.
 
      - sudo apt-get update
      - sudo apt-get upgrade
@@ -53,11 +53,11 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
      - cp /boot/config-5.11.0-38-generic  .config
      - make oldconfig
      - make prepare
-     - created following files manually
+     - created following files manually**
        - x509.genkey file under /linux/certs
        - signing_key.pem file under/linux/certs 
        - canonical-certs.pem file under /linux/debian  
-       - canonical-revoked-certs.pem file /linux/debian**
+       - canonical-revoked-certs.pem file under /linux/debian
      - make -j 6 modules (replace 6 with the number of vcpus you have allocated to the vm - this is for compiling modules in parallel)
      - make -j 6
      - sudo make modules_install
@@ -66,7 +66,7 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
 18. Once the reboot is successful, you can check if you are using newly compiled kernel by doing uname -a command in terminal. If the kernel version has changed to the latest one(in my case the version changed from 5.11.0-38-generic to 5.15.0+) And the time stamp should also reflect the date and time on which you have compiled and installed the kernel(updated timestamp- Linux ubuntu 5.15.0+ #2 SMP PREEMPT Sat Nov 6 10:46:00 PDT 2021).
 
 19. Create a folder 283-1 inside linux folder and add cmpe283-1.c and Makefile to this folder. 
-20. Goto this folder and run make and check if cmpe283-1.ko is generated using command - ls *.ko
+20. Goto 283-1 folder and use  make command to generate cmpe283-1.ko file and check if cmpe283-1.ko is generated using command - ls *.ko
      - if you get error regarding missing license add this line at the end of cmpe283-1.c file - MODULE_LICENSE("GPL v2");
 21. Use command 
      - sudo insmod cmpe283-1.ko to load module and check if module loaded using command 
@@ -159,7 +159,8 @@ Prerequisite - Working assignment 1
      - sudo modprobe kvm (load the modules with newly added code.)
      - sudo modprobe kvm_intel
      - Check if modules are loaded using command  - $lsmod | grep kvm
-     - We can also check if global variables are exported correctly using command - $cat /proc/kallsyms | grep 'variable name'
+     - We can also check if global variables are exported correctly using command 
+        - $cat /proc/kallsyms | grep 'variable name'
 
 4. To test the code which is added, we need to create a new VM inside our currently running VM(Ubuntu, the outer VM).
 5. Inner VM can be created by installing virt-manager and other required libraries on Ubuntu, the outer VM.
@@ -174,7 +175,7 @@ Prerequisite - Working assignment 1
      - sudo usermod -aG libvirt $USER
 
 7. Start virt-manager using command - $virt-manager
-8. Follow the onscreen instructions to set up inner VM
+8. Follow the onscreen instructions to set up inner VM. I followed steps provided in this link - https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
 9. For this assignment, I installed fedora as inner VM
    - Install cpuid package using command - $sudo dnf install cpuid
    - Run the commands $cpuid -l 0x4fffffff and $cpuid -l 0x4ffffffe
