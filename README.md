@@ -58,7 +58,7 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
        - signing_key.pem file under/linux/certs 
        - canonical-certs.pem file under /linux/debian  
        - canonical-revoked-certs.pem file /linux/debian**
-     - make -j 6 modules (replace 6 with the number of cup cores you have allocated to the vm - this is for compiling modules in parallel)
+     - make -j 6 modules (replace 6 with the number of vcpus you have allocated to the vm - this is for compiling modules in parallel)
      - make -j 6
      - sudo make modules_install
      - sudo make install
