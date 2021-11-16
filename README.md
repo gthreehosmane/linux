@@ -113,6 +113,10 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
      -  Create canonical-revoked-certs.pem under /linux/debian using vi command in terminal(If debian folder does not exists create on under linux folder)
       Contents of canonical-revoked-certs.pem - Please refer this link - https://salsa.debian.org/kernel-team/linux/-/blob/master/debian/certs/debian-uefi-certs.pem
 
+Screenshot of the output
+<img width="1057" alt="283-1-01" src="https://user-images.githubusercontent.com/13237444/141885271-f638c61a-0bf0-4ceb-91bd-c8c5a92c41d2.png">
+<img width="1021" alt="283-1-02" src="https://user-images.githubusercontent.com/13237444/141885330-2a321549-a2fc-4eda-950c-5f43493531ab.png">
+
 
 This steps are followed for Ubuntu 20.04.3 vm on vmware fusion. You may need to install additional packages for successful kernel compilation depending on the linux distribution you are using and the setup
 
@@ -183,6 +187,11 @@ Detailed information about kvm installation and setting up a VM on Ubuntu can be
 
 1. https://medium.com/codemonday/setup-virt-manager-qemu-libvert-and-kvm-on-ubuntu-20-04-fa448bdecde3
 2. https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
+
+<img width="1702" alt="283-2-01" src="https://user-images.githubusercontent.com/13237444/141885425-34a9b21a-fae6-4f95-bd6f-d0901d49b94d.png">
+<img width="1705" alt="283-2-02" src="https://user-images.githubusercontent.com/13237444/141885476-8231176c-7815-4bf9-9081-7b3231aa5311.png">
+<img width="1708" alt="283-2-03" src="https://user-images.githubusercontent.com/13237444/141885509-90a12a97-171d-4b46-8fdb-b97d39f5f2b8.png">
+
 
 Assignment 2 is completed using VMware Fusion, Ubuntu 20.04 as outer VM and Fedora 35 as inner VM. You may need to modify the steps above if using different outer VM and inner VM.
 
