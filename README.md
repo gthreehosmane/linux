@@ -66,7 +66,7 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
 18. Once the reboot is successful, you can check if you are using newly compiled kernel by doing uname -a command in terminal. If the kernel version has changed to the latest one(in my case the version changed from 5.11.0-38-generic to 5.15.0+) And the time stamp should also reflect the date and time on which you have compiled and installed the kernel(updated timestamp- Linux ubuntu 5.15.0+ #2 SMP PREEMPT Sat Nov 6 10:46:00 PDT 2021).
 
 19. Create a folder 283-1 inside linux folder and add cmpe283-1.c and Makefile to this folder. 
-20. Goto 283-1 folder and use  make command to generate cmpe283-1.ko file and check if cmpe283-1.ko is generated using command - ls *.ko
+20. Goto 283-1 folder and use  make command to generate cmpe283-1.ko file and check if cmpe283-1.ko is generated using command - ls | grep *.ko
      - if you get error regarding missing license add this line at the end of cmpe283-1.c file - MODULE_LICENSE("GPL v2");
 21. Use command 
      - sudo insmod cmpe283-1.ko to load module and check if module loaded using command 
