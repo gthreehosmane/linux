@@ -34,7 +34,7 @@ During vm setup vm was only allocated 20GB of disk space, 4GB ram and 2 cpu core
 15. In terminal, once you are in the directory, where you want to clone the repository type "git clone" and after that add a space and paste the link that you copied from previous step and press enter. The cloning should start after this. Cloning may take some time to complete.
 
 
-16. Installing packages necessary for kernel compilation and installation
+16. Installing packages necessary for kernel compilation and installation: During code compilation, I encountered errors for each missing library, so after multiple tries to compile the code, made list of librarires required.
 
      - sudo apt-get update
      - sudo apt-get upgrade
@@ -150,7 +150,7 @@ Prerequisite - Working assignment 1
     
     c. For printk macro to work we need to add kernel.h header in cpuid.c using #include <linux/kernel.h>
     
-3. Follow below steps to compile the modified code, if there are some errors, you will get errors. Make sure the code compiles without any errors.
+3. Follow below steps to compile the modified code, if there are mistakes in the code, you will get errors. Make sure the code compiles without any errors.
      - sudo make -j 6 (Replace 6 with number of vcpus allocated to your vm)
      - sudo make modules_install
      - sudo make install
