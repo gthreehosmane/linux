@@ -173,6 +173,7 @@ Prerequisite - Working assignment 1
     Add user group and permissions with 
      - sudo usermod -aG kvm $USER
      - sudo usermod -aG libvirt $USER
+     - newgrp libvirt
 
 7. Start virt-manager using command - $virt-manager
 8. Follow the onscreen instructions to set up inner VM. I followed steps provided in this link - https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
