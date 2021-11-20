@@ -210,18 +210,22 @@ Team members - Teja Ganapati Jaddipal(SJSU ID-015957526)
 
 Comments on frequency of exits:
 
-Number of exits do not increase at a stable rate. Only certain exits are common.
-Most frequent exits:
-	- Exit 32 : WRMSR.
-	- Exit 48 : EPT violation
-	- Exit 49 : EPT misconfiguration
-	- Exit 12 : HLT 
-	- Exit 1 : External interrupt.
-Least frequent exits: 
-	- Exit 29 : MOV DR  
-	- Exit 54 : WBINVD or WBNOINVD. 
-	- Exit 31 : RDMSR
-	- Exit 0 : Exception or non-maskable interrupt (NMI).
+1. Number of exits do not increase at a stable rate. Only certain exits are common.
+2. Most frequent exits:
+
+- Exit 32 : WRMSR.
+- Exit 48 : EPT violation
+- Exit 49 : EPT misconfiguration
+- Exit 12 : HLT 
+- Exit 1 : External interrupt.
+
+3. Least frequent exits: 
+
+- Exit 29 : MOV DR  
+- Exit 54 : WBINVD or WBNOINVD. 
+- Exit 31 : RDMSR
+- Exit 0 : Exception or non-maskable interrupt (NMI).
+
 
 
 Steps Followed to complete the assignment 3.
