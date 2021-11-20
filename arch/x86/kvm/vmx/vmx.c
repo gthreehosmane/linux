@@ -73,6 +73,9 @@ MODULE_LICENSE("GPL");
 
 extern u32 total_exits;
 extern u64 total_time_in_vmm;
+extern u32 vm_exits_per_reason[70];
+extern u64 time_per_exit_type[70];
+
 #ifdef MODULE
 static const struct x86_cpu_id vmx_cpu_id[] = {
 	X86_MATCH_FEATURE(X86_FEATURE_VMX, NULL),
@@ -5659,7 +5662,11 @@ static int (*kvm_vmx_exit_handlers[])(struct kvm_vcpu *vcpu) = {
 	[EXIT_REASON_ENCLS]		      = handle_encls,
 	[EXIT_REASON_BUS_LOCK]                = handle_bus_lock_vmexit,
 };
-
+/*
+kvm has total 51 types of exits enabled among 64 types of exits defined by Intel SDM.
+There are no exit handlers for exit types 3-INIT Signal, 4-Start-up IPI (SIPI), **5-I/O system-management interrupt (SMI), 6-Other SMI,  11-GETSEC, 16-RDTSC, 17-RSM, **33-VM-entry failure due to invalid guest state, **34-VM-entry failure due to MSR loading, 51-RDTSCP,63-XSAVES,64-XRSTORS, 66-SPP-related event, 67-UMWAIT, 68-TPAUSE, 69-LOADIWKEY
+Based on this data, values of eax,ebx,ecx,edx will be set to 0 when cpuid is called with exit types that are not enabled for kvm
+*/
 static const int kvm_vmx_max_exit_handlers =
 	ARRAY_SIZE(kvm_vmx_exit_handlers);
 
@@ -5939,9 +5946,8 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
         u64 end_time=0;
         u64 time_spent=0;
         
-        total_exits++;
-        
-        
+        total_exits = total_exits+1;
+        vm_exits_per_reason[exit_reason.basic] = vm_exits_per_reason[exit_reason.basic] + 1;
         start_time = read_time();
 	/*
 	 * Flush logged GPAs PML buffer, this will make dirty_bitmap more
@@ -5960,14 +5966,28 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	 * below) should never happen as that means we incorrectly allowed a
 	 * nested VM-Enter with an invalid vmcs12.
 	 */
-	if (KVM_BUG_ON(vmx->nested.nested_run_pending, vcpu->kvm))
+	if (KVM_BUG_ON(vmx->nested.nested_run_pending, vcpu->kvm)){
+	     end_time = read_time();
+	     time_spent = end_time-start_time;
+	     total_time_in_vmm=total_time_in_vmm+time_spent;
+             time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return -EIO;
+	}
 
 	/* If guest state is invalid, start emulating */
-	if (vmx->emulation_required)
+	if (vmx->emulation_required){
+	        end_time = read_time();
+	        time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return handle_invalid_guest_state(vcpu);
+	}
 
 	if (is_guest_mode(vcpu)) {
+	        end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		/*
 		 * PML is never enabled when running L2, bail immediately if a
 		 * PML full exit occurs as something is horribly wrong.
@@ -5998,6 +6018,10 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 		vcpu->run->fail_entry.hardware_entry_failure_reason
 			= exit_reason.full;
 		vcpu->run->fail_entry.cpu = vcpu->arch.last_vmentry_cpu;
+		end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return 0;
 	}
 
@@ -6064,18 +6088,48 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
 	if (exit_reason.basic >= kvm_vmx_max_exit_handlers)
 		goto unexpected_vmexit;
 #ifdef CONFIG_RETPOLINE
-	if (exit_reason.basic == EXIT_REASON_MSR_WRITE)
+	if (exit_reason.basic == EXIT_REASON_MSR_WRITE){
+	        end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return kvm_emulate_wrmsr(vcpu);
-	else if (exit_reason.basic == EXIT_REASON_PREEMPTION_TIMER)
+	}
+	else if (exit_reason.basic == EXIT_REASON_PREEMPTION_TIMER){
+	        end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return handle_preemption_timer(vcpu);
-	else if (exit_reason.basic == EXIT_REASON_INTERRUPT_WINDOW)
+	}
+	else if (exit_reason.basic == EXIT_REASON_INTERRUPT_WINDOW){
+	        end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return handle_interrupt_window(vcpu);
-	else if (exit_reason.basic == EXIT_REASON_EXTERNAL_INTERRUPT)
+	}
+	else if (exit_reason.basic == EXIT_REASON_EXTERNAL_INTERRUPT){
+	        end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return handle_external_interrupt(vcpu);
-	else if (exit_reason.basic == EXIT_REASON_HLT)
+	}
+	else if (exit_reason.basic == EXIT_REASON_HLT){
+		end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return kvm_emulate_halt(vcpu);
-	else if (exit_reason.basic == EXIT_REASON_EPT_MISCONFIG)
+	}
+	else if (exit_reason.basic == EXIT_REASON_EPT_MISCONFIG){
+	        end_time = read_time();
+		time_spent = end_time-start_time;
+		total_time_in_vmm=total_time_in_vmm+time_spent;
+        	time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 		return handle_ept_misconfig(vcpu);
+	}
 #endif
 
 	exit_handler_index = array_index_nospec((u16)exit_reason.basic,
@@ -6085,6 +6139,7 @@ static int __vmx_handle_exit(struct kvm_vcpu *vcpu, fastpath_t exit_fastpath)
         end_time = read_time();
 	time_spent = end_time-start_time;
 	total_time_in_vmm=total_time_in_vmm+time_spent;
+        time_per_exit_type[exit_reason.basic] = time_per_exit_type[exit_reason.basic] + time_spent;
 	return kvm_vmx_exit_handlers[exit_handler_index](vcpu);
 	
 

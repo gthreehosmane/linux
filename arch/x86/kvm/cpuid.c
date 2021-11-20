@@ -35,8 +35,15 @@ EXPORT_SYMBOL_GPL(kvm_cpu_caps);
 
 u32 total_exits=0;
 u64 total_time_in_vmm=0;
+u32 vm_exits_per_reason[70]={0};
+u64 time_per_exit_type[70]={0};
+
+
 EXPORT_SYMBOL(total_exits);
 EXPORT_SYMBOL(total_time_in_vmm);
+EXPORT_SYMBOL(vm_exits_per_reason);
+EXPORT_SYMBOL(time_per_exit_type);
+
 
 static u32 xstate_required_size(u64 xstate_bv, bool compacted)
 {
@@ -1239,12 +1246,15 @@ EXPORT_SYMBOL_GPL(kvm_cpuid);
 int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 {
 	u32 eax, ebx, ecx, edx;
-
+	u32 reason;
+        /*u32 exit_sum=0;
+        u64 time_sum=0;*/
 	if (cpuid_fault_enabled(vcpu) && !kvm_require_cpl(vcpu, 0))
 		return 1;
 
 	eax = kvm_rax_read(vcpu);
 	ecx = kvm_rcx_read(vcpu);
+	reason = ecx;
 	if(eax == 0x4fffffff){
 	   eax = total_exits;
 	   printk(KERN_INFO "CPUID(0x4FFFFFFF) : Total exits- %u",total_exits);
@@ -1254,6 +1264,65 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	   ebx = (unsigned long)total_time_in_vmm>>32;    //high 32 bits
 	   ecx = (unsigned long)total_time_in_vmm&0xffffffff;    //low 32 bits
 	   printk(KERN_INFO "CPUID(0x4FFFFFFE) : Time spent in processing all exits- %llu cycles",total_time_in_vmm);
+	}
+	else if(eax == 0x4ffffffd){
+	    /*int i;
+	    for(i=0;i<70;i++){
+	     exit_sum = exit_sum+vm_exits_per_reason[i];
+	     printk(KERN_INFO "CPUID(0x4FFFFFFD), number of exits for exit reason %u is : %u",i,vm_exits_per_reason[i]);
+	    }*/
+	   if((ecx < 0 || ecx>69) || ((ecx==35) || (ecx==38) || (ecx==42) || (ecx==65))){
+	    eax = 0;
+	    ebx = 0;
+	    ecx = 0;
+	    edx = 0xFFFFFFFF; 
+	    printk(KERN_INFO "CPUID(0x4FFFFFFD), exit reason %u is undefined",(int)reason);
+	   }
+	   else if((ecx ==3) ||(ecx ==4) ||(ecx ==6) ||
+                   (ecx ==11) ||(ecx==16) ||(ecx==17) || 
+                   (ecx==51) ||(ecx==63) ||(ecx ==64)||(ecx ==66) ||
+                   (ecx ==67) ||(ecx==68) ||(ecx ==69)){
+	    eax = 0;
+	    ebx = 0;
+	    ecx = 0;
+	    edx = 0; 
+	    printk(KERN_INFO "CPUID(0x4FFFFFFD), exit reason %u is disabled for kvm",(int)reason);
+	   }
+	   else{
+	    eax = vm_exits_per_reason[ecx];
+            printk(KERN_INFO "CPUID(0x4FFFFFFD), number of exits for exit reason %u is : %u",(int)reason,(int)vm_exits_per_reason[reason]);
+            //printk(KERN_INFO "Equalcheck***, totalexit = %u exitsum =  %u",total_exits,exit_sum);
+	  }
+	}
+	else if(eax == 0x4ffffffc){
+	   /*int i;
+	    for(i=0;i<70;i++){
+	     time_sum = time_sum + time_per_exit_type[i];
+	     printk(KERN_INFO "CPUID(0x4FFFFFFC), time spent for exit reason %u is : %llu cycles",i,time_per_exit_type[i]);
+	    }*/
+	   if((ecx < 0 || ecx>69) || ((ecx==35) || (ecx==38) || (ecx==42) || (ecx==65))){
+	    eax = 0;
+	    ebx = 0;
+	    ecx = 0;
+	    edx = 0xFFFFFFFF; 
+	    printk(KERN_INFO "CPUID(0x4FFFFFFC), exit reason %u is undefined",(int)reason);
+	   }
+	   else if((ecx ==3) ||(ecx ==4) ||(ecx ==6) ||
+                   (ecx ==11) ||(ecx==16) ||(ecx==17) ||
+                   (ecx==51) ||(ecx==63) ||(ecx ==64)||(ecx ==66) ||
+                   (ecx ==67) ||(ecx==68) ||(ecx ==69)){
+	    eax = 0;
+	    ebx = 0;
+	    ecx = 0;
+	    edx = 0; 
+	    printk(KERN_INFO "CPUID(0x4FFFFFFC), exit reason %u is disabled for kvm",(int)reason);
+	   }
+	   else{
+	    ebx = (time_per_exit_type[ecx])>>32; // high 32 bits
+	    ecx = (time_per_exit_type[ecx])&0xffffffff; // low 32 bits
+            printk(KERN_INFO "CPUID(0x4FFFFFFC), time spent for exit reason %u is : %llu cycles",(int)reason,time_per_exit_type[reason]);
+            //printk(KERN_INFO "Equalcheck***, totaltime = %llu timesum =  %llu",total_time_in_vmm,time_sum);
+	  }
 	}
 	else{
 	   kvm_cpuid(vcpu, &eax, &ebx, &ecx, &edx, false);
