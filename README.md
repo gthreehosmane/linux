@@ -158,7 +158,8 @@ Prerequisite - Working assignment 1
      - sudo rmmod kvm
      - sudo modprobe kvm (load the modules with newly added code.)
      - sudo modprobe kvm_intel
-     - Check if modules are loaded using command  - $lsmod | grep kvm
+     - Check if modules are loaded using command  
+        - $lsmod | grep kvm
      - We can also check if global variables are exported correctly using command 
         - $cat /proc/kallsyms | grep 'variable name'
 
@@ -179,7 +180,11 @@ Prerequisite - Working assignment 1
 8. Follow the onscreen instructions to set up inner VM. I followed steps provided in this link - https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
 9. For this assignment, I installed fedora as inner VM
    - Install cpuid package using command - $sudo dnf install cpuid
-   - Run the commands $cpuid -l 0x4fffffff and $cpuid -l 0x4ffffffe
+   - Run the commands (-l option for the cpuid command specifies the leaf node(eax value))
+     - $cpuid -l 0x4fffffff 
+     - $cpuid -l 0x4ffffffe
+   
+   
 
 10. Check the message buffer of outer VM using $dmesg command
 
@@ -190,12 +195,98 @@ Detailed information about kvm installation and setting up a VM on Ubuntu can be
 1. https://medium.com/codemonday/setup-virt-manager-qemu-libvert-and-kvm-on-ubuntu-20-04-fa448bdecde3
 2. https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
 
+Output screenshots
 <img width="1702" alt="283-2-01" src="https://user-images.githubusercontent.com/13237444/141885425-34a9b21a-fae6-4f95-bd6f-d0901d49b94d.png">
 <img width="1705" alt="283-2-02" src="https://user-images.githubusercontent.com/13237444/141885476-8231176c-7815-4bf9-9081-7b3231aa5311.png">
 <img width="1708" alt="283-2-03" src="https://user-images.githubusercontent.com/13237444/141885509-90a12a97-171d-4b46-8fdb-b97d39f5f2b8.png">
 
 
 Assignment 2 is completed using VMware Fusion, Ubuntu 20.04 as outer VM and Fedora 35 as inner VM. You may need to modify the steps above if using different outer VM and inner VM.
+
+
+Assignment 3: Special CPUID leaf nodes - 0x4FFFFFFD and 0x4FFFFFFC
+
+Team members - Teja Ganapati Jaddipal(SJSU ID-015957526)
+
+Comments on frequency of exits:
+
+Number of exits do not increase at a stable rate. Only certain exits are common.
+Most frequent exits:
+	- Exit 32 : WRMSR.
+	- Exit 48 : EPT violation
+	- Exit 49 : EPT misconfiguration
+	- Exit 12 : HLT 
+	- Exit 1 : External interrupt.
+Least frequent exits: 
+	- Exit 29 : MOV DR  
+	- Exit 54 : WBINVD or WBNOINVD. 
+	- Exit 31 : RDMSR
+	- Exit 0 : Exception or non-maskable interrupt (NMI).
+
+
+Steps Followed to complete the assignment 3.
+
+Prerequisite - Working assignment 1 and 2
+
+1. Goto path-to-linux-folder-/linux/arch/x86 
+2. Modify the vmx.c and cpuid.c by adding required code to handle special CPUID leaf nodes 0x4FFFFFFD and 0x4FFFFFFC. vmx.c will be located in ../x86/kvm/vmx/vmx.c and cpuid.c in ../x86/kvm/cpuid.c
+
+   a. Declared and exported the global variables vm_exits_per_reason and time_per_exit_type in cpuid.c and used them in vmx.c using extern keyword to avoid cyclic dependency errors.
+   
+   b. Reused inline assembly code snippet to read time from assignment 2.
+  
+	// reference https://www.mcs.anl.gov/~kazutomo/rdtsc.html
+	
+	
+			static __inline__ unsigned long long read_time(void)
+			{
+			  unsigned hi, lo;
+			  __asm__ __volatile__ ("rdtsc" : "=a"(lo), "=d"(hi));
+			  return ( (unsigned long long)lo)|( ((unsigned long long)hi)<<32 );
+			}
+	
+    
+    
+3. Follow below steps to compile the modified code, if there are mistakes in the code, you will get errors. Make sure the code compiles without any errors.
+     - sudo make -j 6 (Replace 6 with number of vcpus allocated to your vm)
+     - sudo make modules_install
+     - sudo make install
+     - sudo rmmod kvm_intel (Remove existing kvm and kvm_intel modules. kvm module cannot be removed first since it is kvm_intel module is depending on kvm module, so kvm_intel must be removed first.)
+     - sudo rmmod kvm
+     - sudo modprobe kvm (load the modules with newly added code.)
+     - sudo modprobe kvm_intel
+     - Check if modules are loaded using command  
+        - $lsmod | grep kvm
+     - We can also check if global variables are exported correctly using command 
+        - $cat /proc/kallsyms | grep 'variable name'
+
+4. To test the code which is added, we need to create a VM inside our currently running VM(Ubuntu, the outer VM). We have installed kvm and created a inner vm alreday in assignment 2. So, the same inner VM can be reused to test this assignment.
+5. Start virt-manager using command - $virt-manager
+
+6. For this assignment, I used fedora as inner VM
+   - cpuid package is already installed in inner vm in assignment 2.
+   - Run the commands below with different exit types (-l option for the cpuid command specifies the leaf node(eax value) and -s specifies the subleaf node(ecx value)).
+   	- $cpuid -l 0x4ffffffd -s{exit_type} 
+   	- $cpuid -l 0x4ffffffc -s{exit_type} 
+   
+
+7. Check the message buffer of outer VM using $dmesg command
+
+
+
+Detailed information about kvm installation and setting up a VM on Ubuntu can be found here.
+
+1. https://medium.com/codemonday/setup-virt-manager-qemu-libvert-and-kvm-on-ubuntu-20-04-fa448bdecde3
+2. https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
+
+Output screenshots
+<img width="1702" alt="283-3-01" src="https://user-images.githubusercontent.com/13237444/142742291-b4404aff-199d-4933-9316-064678f363b6.png">
+<img width="1675" alt="283-3-02" src="https://user-images.githubusercontent.com/13237444/142742303-9bb867c5-ffc1-4ef6-bba7-14c87d81c731.png">
+<img width="1246" alt="283-3-03" src="https://user-images.githubusercontent.com/13237444/142742311-a0f44db4-0cae-4864-a69d-c9ffa80a37e2.png">
+<img width="10" alt="283-3-04" src="https://user-images.githubusercontent.com/13237444/142742319-3f337a9a-b9e8-480d-8755-f5a236cb1ea3.png">
+<img width="1060" alt="283-3-05" src="https://user-images.githubusercontent.com/13237444/142742328-035b35b5-8c49-4c1d-a53b-9ae7cd975b92.png">
+
+Assignment 3 is completed using VMware Fusion, Ubuntu 20.04 as outer VM and Fedora 35 as inner VM. You may need to modify the steps above if using different outer VM and inner VM.
 
 
  
