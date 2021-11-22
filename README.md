@@ -178,7 +178,8 @@ Prerequisite - Working assignment 1
 
 7. Start virt-manager using command - $virt-manager
 8. Follow the onscreen instructions to set up inner VM. I followed steps provided in this link - https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
-9. For this assignment, I installed fedora as inner VM
+9. I changed the cpu configuration to kvm64 from host configuration(By default this will be selected). This has to be done before inner vm installation. I was facing some errors for using host configuration(which is the default option), to resolve error I selected kvm64 cpu configuration.
+10. For this assignment, I installed fedora as inner VM
    - Install cpuid package using command - $sudo dnf install cpuid
    - Run the commands (-l option for the cpuid command specifies the leaf node(eax value))
      - $cpuid -l 0x4fffffff 
@@ -186,9 +187,9 @@ Prerequisite - Working assignment 1
    
    
 
-10. Check the message buffer of outer VM using $dmesg command
+11. Check the message buffer of outer VM using $dmesg command
 
-11. You may want disable autostart default network in kvm else you wont be able to restart inner VM once you shutdown outer VM(I have faced this issue).
+12. You may want disable autostart default network in kvm else you wont be able to restart inner VM once you shutdown outer VM(I have faced this issue).
 
 Detailed information about kvm installation and setting up a VM on Ubuntu can be found here.
 
