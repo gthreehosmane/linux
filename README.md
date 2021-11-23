@@ -122,7 +122,7 @@ This steps are followed for Ubuntu 20.04.3 vm on vmware fusion. You may need to 
 
 
 
-Assignment 2: Special CPUID leaf nodes - 0x4FFFFFFF and 0x4FFFFFFE
+Assignment 2: Instrumentation via hypercall - Special CPUID leaf nodes - 0x4FFFFFFF and 0x4FFFFFFE
 
 Team members - Teja Ganapati Jaddipal(SJSU ID-015957526)
 
@@ -165,7 +165,8 @@ Prerequisite - Working assignment 1
 
 4. To test the code which is added, we need to create a new VM inside our currently running VM(Ubuntu, the outer VM).
 5. Inner VM can be created by installing virt-manager and other required libraries on Ubuntu, the outer VM.
-6. Follow below steps to install and create a new inner VM inside outer VM
+6. Follow below steps to install and create a new inner VM inside outer VM. I followed the steps mentioned in https://medium.com/codemonday/setup-virt-manager-qemu-libvert-and-kvm-on-ubuntu-20-04-fa448bdecde3 and  https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
+
      - sudo apt update
      - sudo apt install cpu-checker
      - kvm-ok (This command is to check if our outer VM can run a VM inside itself - nested virtualization)
@@ -205,13 +206,13 @@ Output screenshots
 Assignment 2 is completed using VMware Fusion, Ubuntu 20.04 as outer VM and Fedora 35 as inner VM. You may need to modify the steps above if using different outer VM and inner VM.
 
 
-Assignment 3: Special CPUID leaf nodes - 0x4FFFFFFD and 0x4FFFFFFC
+Assignment 3: Instrumentation via hypercall - Special CPUID leaf nodes - 0x4FFFFFFD and 0x4FFFFFFC
 
 Team members - Teja Ganapati Jaddipal(SJSU ID-015957526)
 
 Comments on frequency of exits:
 
-1. Number of exits do not increase at a stable rate. Only certain exits are common.
+1. Number of exits do not increase at a stable rate. Only certain exits are common. More exits will happen in operations like installing new packages which require memory and network access. A full vm boot resulted in 956897 exits in my case.
 2. Most frequent exits:
 
 - Exit 32 : WRMSR.
