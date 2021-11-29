@@ -286,13 +286,13 @@ Detailed information about kvm installation and setting up a VM on Ubuntu can be
 2. https://linuxize.com/post/how-to-install-kvm-on-ubuntu-20-04/
 
 Output screenshots
-<img width="1702" alt="283-3-01" src="https://user-images.githubusercontent.com/13237444/142742291-b4404aff-199d-4933-9316-064678f363b6.png">
-<img width="1675" alt="283-3-02" src="https://user-images.githubusercontent.com/13237444/142742303-9bb867c5-ffc1-4ef6-bba7-14c87d81c731.png">
-<img width="1246" alt="283-3-03" src="https://user-images.githubusercontent.com/13237444/142742311-a0f44db4-0cae-4864-a69d-c9ffa80a37e2.png">
-<img width="10" alt="283-3-04" src="https://user-images.githubusercontent.com/13237444/142742319-3f337a9a-b9e8-480d-8755-f5a236cb1ea3.png">
-<img width="1060" alt="283-3-05" src="https://user-images.githubusercontent.com/13237444/142742328-035b35b5-8c49-4c1d-a53b-9ae7cd975b92.png">
 
+<img width="1699" alt="Screen Shot 2021-11-29 at 12 40 03 PM" src="https://user-images.githubusercontent.com/13237444/143941165-b9d66c79-1b3a-4bed-a6f7-43c1e549088f.png">
+<img width="1640" alt="Screen Shot 2021-11-29 at 12 40 35 PM" src="https://user-images.githubusercontent.com/13237444/143941352-d022177f-da49-47e4-ab34-333797b99691.png">
+<img width="1503" alt="Screen Shot 2021-11-29 at 12 46 28 PM" src="https://user-images.githubusercontent.com/13237444/143941394-ea326467-1cd3-4937-a6d9-58e3ac66dc23.png">
+<img width="1529" alt="Screen Shot 2021-11-29 at 12 47 31 PM" src="https://user-images.githubusercontent.com/13237444/143941451-f6a41f54-167d-4d6e-af7a-299d0f18dac1.png">
 Assignment 3 is completed using VMware Fusion, Ubuntu 20.04 as outer VM and Fedora 35 as inner VM. You may need to modify the steps above if using different outer VM and inner VM.
+
 
 
  
