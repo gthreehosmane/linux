@@ -1266,11 +1266,6 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	   printk(KERN_INFO "CPUID(0x4FFFFFFE) : Time spent in processing all exits- %llu cycles",total_time_in_vmm);
 	}
 	else if(eax == 0x4ffffffd){
-	    /*int i;
-	    for(i=0;i<70;i++){
-	     exit_sum = exit_sum+vm_exits_per_reason[i];
-	     printk(KERN_INFO "CPUID(0x4FFFFFFD), number of exits for exit reason %u is : %u",i,vm_exits_per_reason[i]);
-	    }*/
 	   if((ecx < 0 || ecx>69) || ((ecx==35) || (ecx==38) || (ecx==42) || (ecx==65))){
 	    eax = 0;
 	    ebx = 0;
@@ -1289,17 +1284,18 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	    printk(KERN_INFO "CPUID(0x4FFFFFFD), exit reason %u is disabled for kvm",(int)reason);
 	   }
 	   else{
+	    int i;
 	    eax = vm_exits_per_reason[ecx];
             printk(KERN_INFO "CPUID(0x4FFFFFFD), number of exits for exit reason %u is : %u",(int)reason,(int)vm_exits_per_reason[reason]);
             //printk(KERN_INFO "Equalcheck***, totalexit = %u exitsum =  %u",total_exits,exit_sum);
+            printk(KERN_INFO "Number of exits for rest of the reasons");
+            for(i=0;i<70;i++){
+	     //exit_sum = exit_sum+vm_exits_per_reason[i];
+	     printk(KERN_INFO "Exit reason %u : exits = %u",i,vm_exits_per_reason[i]);
+	    }
 	  }
 	}
 	else if(eax == 0x4ffffffc){
-	   /*int i;
-	    for(i=0;i<70;i++){
-	     time_sum = time_sum + time_per_exit_type[i];
-	     printk(KERN_INFO "CPUID(0x4FFFFFFC), time spent for exit reason %u is : %llu cycles",i,time_per_exit_type[i]);
-	    }*/
 	   if((ecx < 0 || ecx>69) || ((ecx==35) || (ecx==38) || (ecx==42) || (ecx==65))){
 	    eax = 0;
 	    ebx = 0;
@@ -1318,10 +1314,16 @@ int kvm_emulate_cpuid(struct kvm_vcpu *vcpu)
 	    printk(KERN_INFO "CPUID(0x4FFFFFFC), exit reason %u is disabled for kvm",(int)reason);
 	   }
 	   else{
+	    int i;
 	    ebx = (time_per_exit_type[ecx])>>32; // high 32 bits
 	    ecx = (time_per_exit_type[ecx])&0xffffffff; // low 32 bits
             printk(KERN_INFO "CPUID(0x4FFFFFFC), time spent for exit reason %u is : %llu cycles",(int)reason,time_per_exit_type[reason]);
             //printk(KERN_INFO "Equalcheck***, totaltime = %llu timesum =  %llu",total_time_in_vmm,time_sum);
+            printk(KERN_INFO "Time spent for rest of the exit reasons");
+	    for(i=0;i<70;i++){
+	     //time_sum = time_sum + time_per_exit_type[i];
+	     printk(KERN_INFO "Exit reason %u : time spent  = %llu cycles",i,time_per_exit_type[i]);
+	    }
 	  }
 	}
 	else{
