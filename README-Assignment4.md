@@ -10,34 +10,55 @@ Steps followed -
 1. Ran assignment 3 code and booted inner VM using that code.
 2. Once the VM has booted, recorded total exit count information (total count for each type of exit handled by KVM) using a series of queries of CPUID leaf function
 0x4FFFFFFD. 
-   - cpuid -l 0x4ffffffd -s{exit_type}
+   - $cpuid -l 0x4ffffffd -s{exit_type}
 3. Tured off inner VM.
 4. Remove the ‘kvm-intel’ module from your running kernel using command
-   - sudo rmmod kvm-intel
+   - $sudo rmmod kvm-intel
 5. Reload the kvm-intel module with the parameter ept=0  and vpid=0 (this will disable nested paging and force KVM to use shadow paging instead). This is done using command 
-   - insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
+   - $insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
 6. Booted the same test VM again, and recorded total exit count information (total count for each type of exit handled by KVM) using a series of queries of CPUID leaf function 0x4FFFFFFD. 
-   - cpuid -l 0x4ffffffd -s{exit_type}
+   - $cpuid -l 0x4ffffffd -s{exit_type}
 
 Things to note - 
 1. As per assignment 3 description and implementation, 0x4ffffffd is used to record total exits for each exit type not 0x4FFFFFFE(in my case).
 2. The version of new kernel that is built in assignment 1 is 5.15.0+ so, I replaced XXX with 5.15.0+
 3. When I used rmmod and insmod commands without sudo I got permission denied error. So I had to run those commands with sudo.
 4. When I reloaded kvm_intel module with ept=0, It was not possible to boot up inner vm, it crashed frequently. So after little bit of research I got to know that adding vpid=0 parameter along with ept=0 could work. Tried that using below command and the inner vm booted successfully. Inner vm was very slow with shadow paging enabled.
-   - insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
+   - $insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
+
+<img width="1258" alt="283-4-08" src="https://user-images.githubusercontent.com/13237444/144732917-9fdf9db0-671d-43c2-9b2d-02f6edb7f9a1.png">
    
    
 Sample from demsg
 
-With ept
+With ept - 
 
-Without ept
+<img width="1691" alt="283-4-01" src="https://user-images.githubusercontent.com/13237444/144732872-a5716d8b-b671-4ed3-9779-15a50e851e18.png">
+
+<img width="1696" alt="283-4-02" src="https://user-images.githubusercontent.com/13237444/144732878-a8a1e23e-9f10-44b2-82ee-1ca4d3ff84af.png">
+
+<img width="1695" alt="283-4-05" src="https://user-images.githubusercontent.com/13237444/144732906-de9670fb-90b4-461e-9a30-1cb12ab2248f.png">
+
+<img width="1704" alt="283-4-07" src="https://user-images.githubusercontent.com/13237444/144733038-11414f31-1d53-4234-8bcc-25a38b730b7b.png">
+
+
+
+Without ept - 
+
+<img width="1689" alt="283-4-09" src="https://user-images.githubusercontent.com/13237444/144732948-db348e2c-8782-451b-8838-56f88cc5be58.png">
+
+<img width="1667" alt="283-4-11" src="https://user-images.githubusercontent.com/13237444/144732987-ac41b62a-7b90-4c7d-8b18-d5978798d29d.png">
+
+<img width="1674" alt="283-4-14" src="https://user-images.githubusercontent.com/13237444/144733006-1d16bf8b-0002-4d39-b3f7-00dc07af1efd.png">
+
+<img width="1681" alt="283-4-18" src="https://user-images.githubusercontent.com/13237444/144733030-16afaff0-a381-4a38-b207-2de03fca1871.png">
+
 
 About exit counts - 
 
 What did you learn from the count of exits? Was the count what you expected? If not, why not?
 
-- I was expecting the that the exit counts will be increased by a few thousands in case of shadow paging since there will be  more page faults, but to my surprise some exit counts were around 3 times more than that of nested paging. 
+- I was expecting the that the exit counts will be increased by a few thousands in case of shadow paging since there will be  more page faults, but to my surprise some exit counts were around 3 times more than that of nested paging. Also, there were 2 new exits types, this is because, for shadow paging to work correctly more exit types needs to be enabled than nested paging. 
 
 Exit types that are around 3 times more than that of nested paging.
 
@@ -51,9 +72,9 @@ Exit types that are around 3 times more than that of nested paging.
  
 Also, there were 2 new type of exits that occured in shadow paging.
 - Exit 14 : INVLPG 
-       - Since exits on TLB flushes is enabled in shadow paging. 
+     - This is because exits on TLB flushes is enabled in shadow paging. 
 - Exit 33 : VM-entry failure due to invalid guest state. 
-       - Many VM-entry failures happened because checks performed on few of the guest state registers failed.
+     - Many VM-entry failures happened because checks performed on few of the guest state registers failed.
  
 
 What changed between the two runs (ept vs no-ept)?
