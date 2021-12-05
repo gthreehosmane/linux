@@ -312,7 +312,7 @@ Steps followed -
    - $cpuid -l 0x4ffffffd -s{exit_type}
 3. Tured off inner VM.
 4. Remove the ‘kvm-intel’ module from your running kernel using command
-   - sudo rmmod kvm-intel
+   - $sudo rmmod kvm-intel
 5. Reload the kvm-intel module with the parameter ept=0  and vpid=0 (this will disable nested paging and force KVM to use shadow paging instead). This is done using command 
    - $insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
 6. Booted the same test VM again, and recorded total exit count information (total count for each type of exit handled by KVM) using a series of queries of CPUID leaf function 0x4FFFFFFD. 
