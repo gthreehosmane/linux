@@ -13,19 +13,13 @@ Steps followed -
 3. Turned off inner VM.
 4. Remove the ‘kvm-intel’ module from your running kernel using command
    - $sudo rmmod kvm-intel
-5. Reload the kvm-intel module with the parameter ept=0  and vpid=0 (this will disable nested paging and force KVM to use shadow paging instead). This is done using command 
-   - $insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
+5. Reload the kvm-intel module with nested paging disabled.
 6. Booted the same test VM again, and recorded total exit count information (total count for each type of exit handled by KVM) using a series of queries of CPUID leaf function 0x4FFFFFFD. (-l option for the cpuid command specifies the leaf node(eax value) and -s specifies the subleaf node(ecx value)).
    - $cpuid -l 0x4ffffffd -s{exit_type}
 
-Things to note - 
-1. As per assignment 3 description and implementation, 0x4ffffffd is used to record total exits for each exit type not 0x4FFFFFFE(in my case).
-2. The version of new kernel that is built in assignment 1 is 5.15.0+ so, I replaced XXX with 5.15.0+
-3. When I used rmmod and insmod commands without sudo I got permission denied error. So I had to run those commands with sudo.
-4. When I reloaded kvm_intel module with ept=0, It was not possible to boot up inner vm, it crashed frequently. So after little bit of research I got to know that adding vpid=0 parameter along with ept=0 could work. Tried that using below command and the inner vm booted successfully. Inner vm was very slow with shadow paging enabled.
-   - $insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0
 
-<img width="1258" alt="283-4-08" src="https://user-images.githubusercontent.com/13237444/144732917-9fdf9db0-671d-43c2-9b2d-02f6edb7f9a1.png">
+
+
    
    
 Sample from demsg
@@ -78,6 +72,23 @@ Also, there were 2 new type of exits that occured in shadow paging.
 
 What changed between the two runs (ept vs no-ept)?
 -  As far as my understanding, shadow paging requires more exits to be enabled compared to that of nested paging. These exits include exits on %cr3 read and write, exits on page faults occuring in shadow page table and guest page table, exits on TLB flushes to remove stale entries when there is a free. This is the reason for increase in the number of exits.
+   
+   
+   
+   
+   
+Things to note - 
+1. As per assignment 3 description and implementation, 0x4ffffffd is used to record total exits for each exit type not 0x4FFFFFFE(in my case).
+2. The version of new kernel that is built in assignment 1 is 5.15.0+ so, I replaced XXX with 5.15.0+
+3. When I used rmmod and insmod commands without sudo I got permission denied error. So I had to run those commands with sudo.
+4. When I reloaded kvm_intel module with ept=0, It was not possible to boot up inner vm, it crashed frequently. So after little bit of research I got to know that adding vpid=0 parameter along with ept=0 could work. Tried that using below command and the inner vm booted successfully. Inner vm was very slow with shadow paging enabled.
+   - $insmod /lib/modules/5.15.0+/kernel/arch/x86/kvm/kvm-intel.ko ept=0 vpid=0   
+  
+Reference:  
+  
+https://www.programmerall.com/article/5356950633/   
+https://stackoverflow.com/questions/46589149/how-to-set-kvm-vm-use-shadow-page-table
+https://blog.stgolabs.net/2012/05/kvm-intel-associative-tlbs.html
    
    
 Assignment 4 is completed using VMware Fusion, Ubuntu 20.04 as outer VM and Fedora 35 as inner VM. You may need to modify the steps above if using different outer VM and inner VM.
